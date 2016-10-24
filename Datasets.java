@@ -83,6 +83,7 @@ public class Datasets{
 		
 	    System.out.print( n.showitems());
 	}
+	System.out.println("\n");
     }
 
     //outputs headings of the data types
@@ -127,214 +128,185 @@ public class Datasets{
     //output, also returns the predicted output as a string
     String classifiersKNearest( int _k, Data _d){
 
+	//first outputs all present data
+	outputData();
+	
 	//create an array to store the positions of _k number of agents
 	int[] lowest = new int[_k];
-
-	//array is filled with minus values so that 0 is not found in each row
-	//by following checks to find the lowest
-	for( int a = 0; a < lowest.length; a++){
-
-	    lowest[a] = -1;
-	}
-
-	int a = 0;
-	//loops for _k times
-	while( a != _k){
-	
-	    //stores lowest value as part of a find lowest algorithm
-	    int check = 1000;
-	
-	    //loops for each agent 
-	    for( int row = 0; row < dataline.size()-1; row++){
+		
+	//loops for each agent 
+	for( int row = 0; row < dataline.size(); row++){
 	    
-		//checks each agent against data object in args to find lowest
-		if( classifierCompareToInput( row, _d) < check){
-
-		    //loops through array 'lowest', if the agent has been found before then
-		    //the value is not stored
-		    for( int r = 0; r < lowest.length; r++){
-
-			if( r != row){
-
-			    check =  classifierCompareToInput( row, _d);
-			    lowest[r] = row;		   
-			}else{
-
-			    break;
-			}
-		    }
-		}
-
-	    }
-	    a++;
+	    System.out.println( classifierCompareRowAndData( row, _d));
+	    dataline.get( row).relativepos = classifierCompareRowAndData( row, _d);
 	}
 
-	String temp = "";
 	
-	for( int z = 0; z < _k; z++){
-	    
-	    //outputs the k nearest lines of data
-	    System.out.println( "row: " + lowest[z] + " is the " + z + "th nearest out of K" + _k + " to input data");
-	    temp += (" " + dataline.get(z).classString);
-	}
 
-	return temp;
+        return "mow";
     }
     
 
-    //creates a data object and returns it afterwards
-    Data userCreateDataObject(){
+//creates a data object and returns it afterwards
+Data userCreateDataObject(){
 
-	Scanner in = new Scanner(System.in);
+    Scanner in = new Scanner(System.in);
 
-	Data d = new Data();
+    Data d = new Data();
 
-	//adds the next patient number on the end
-	d.items.add( String.valueOf(dataline.size()-1));
+    //adds the next patient number on the end
+    d.items.add( String.valueOf(dataline.size()-1));
 
-	System.out.println();
-	System.out.println("Input the new patient's 5 symptoms regarding");
-	System.out.println("Sore Throat, Fever, Swollen Glands, Congestion, Headache");
-	System.out.println("Input Yes or No, ONE PER LINE, CASE SENSITIVE!:");
-	System.out.println();
+    System.out.println();
+    System.out.println("Input the new patient's 5 symptoms regarding");
+    System.out.println("Sore Throat, Fever, Swollen Glands, Congestion, Headache");
+    System.out.println("Input Yes or No, ONE PER LINE, CASE SENSITIVE!:");
+    System.out.println();
 	
-	for(int j=1;j<=5;j++)
-	    d.items.add( in.nextLine());
+    for(int j=1;j<=5;j++)
+	d.items.add( in.nextLine());
 	    
-	return d;
-    }
+    return d;
+}
 
 
-    //compares a row of data with an object of type data
-    int classifierCompareToInput( int row, Data data){
+//compares a row of data with an object of type data
+    int classifierCompareRowAndData(int row, Data data){
 	    	    
-	int temp = 0;
+    int temp = 0;
+    
 
-	//if both the first and last features of a set are not needed
-	if( isNumAndClass){
+    //if both the first and last features of a set are not needed
+    if( isNumAndClass){
 
 		    
-	    //loops for the number of features that are relevant
-	    for( int i = 1; i < dataline.get(0).items.size()-1; i++){
+	//loops for the number of features that are relevant
+	for( int i = 1; i < dataline.get(0).items.size()-1; i++){
 
-		if( dataline.get( row).items.get(i).equals( data.items.get(i))){
+	    if( dataline.get( row).items.get(i).equals( data.items.get(i))){
 
 			    
-		    temp++;
-		}
+		temp++;
 	    }
 	}
-
-	return temp;
     }
+
+    return temp;
+}
 	    
    
 
 
-    //compares one existing agent row to another existing agent row for classifiers
-    int classifierCompareToRows( int _r1, int _r2){
+//compares one existing agent row to another existing agent row for classifiers
+int classifierCompareToRows( int _r1, int _r2){
 
-	int temp = 0;
+    int temp = 0;
 
-	//if both the first and last features of a set are not needed
-	if( isNumAndClass){
+    //if both the first and last features of a set are not needed
+    if( isNumAndClass){
     
-	    //loops for the number of features that are relevant
-	    for( int i = 1; i < dataline.get(0).items.size()-1; i++){
+	//loops for the number of features that are relevant
+	for( int i = 1; i < dataline.get(0).items.size()-1; i++){
 
-		if( dataline.get( _r1).items.get(i).equals(dataline.get( _r2).items.get(i))){
+	    if( dataline.get( _r1).items.get(i).equals(dataline.get( _r2).items.get(i))){
 
 		
-		    temp++;
-		}
+		temp++;
 	    }
 	}
-	    
-	return temp;
     }
-
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // a class designed to manage multi dimensional array lists of any kind of data //
-    //////////////////////////////////////////////////////////////////////////////////
-    public class Data{
-
-	ArrayList<String> items;
-	int itemNumber;
-	String classString;
 	    
-	Data(){
+    return temp;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// a class designed to manage multi dimensional array lists of any kind of data //
+//////////////////////////////////////////////////////////////////////////////////
+public class Data{
+
+    //stores each item of data
+    ArrayList<String> items;
+
+    //stores the first and last items of data if the first item is a number and the last a classifier output string
+    int itemNumber;
+    String classString;
+
+    //this is for storing this rows position relative to others
+    int relativepos;
+	    
+    Data(){
 		
-	    items = new ArrayList<String>();
-	}
+	items = new ArrayList<String>();
+    }
 	   
 
-	//if the data input starts with a listing number
-	void setItemNum( int _num){
+    //if the data input starts with a listing number
+    void setItemNum( int _num){
 
-	    itemNumber = _num;
-	}
+	itemNumber = _num;
+    }
 	    
-	//if the data ends with a string classifier
-	void setClassString( String _string){
+    //if the data ends with a string classifier
+    void setClassString( String _string){
 
-	    classString = _string;
-	}
+	classString = _string;
+    }
 	    
-	void addString( String _S){
+    void addString( String _S){
 
-	    items.add( _S); 
-	}
+	items.add( _S); 
+    }
 			 
-	//simply returns the list of items delimited with "-" to show that they have been
-	//split into seperate variables
-	String showitems(){
+    //simply returns the list of items delimited with "-" to show that they have been
+    //split into seperate variables
+    String showitems(){
 
-	    String i = "";
+	String i = "";
 		      
-	    for( String c : items)
-		i += ( c + " ");
+	for( String c : items)
+	    i += ( c + " ");
 
-	    return i;
-	}
+	return i;
+    }
 
-	//this function returns the string value of the item at position in args n
-	String getItemString( int _n){
+    //this function returns the string value of the item at position in args n
+    String getItemString( int _n){
 
-	    return items.get( _n);
-	}
+	return items.get( _n);
+    }
 
-	//this function is the same as above but if the function can be returned
-	//as a positive integer then it will be else it will return minus one
-	int getItemInt( int _n){
+    //this function is the same as above but if the function can be returned
+    //as a positive integer then it will be else it will return minus one
+    int getItemInt( int _n){
 
-	    try{
+	try{
 
-		return Integer.parseInt( items.get( _n));
+	    return Integer.parseInt( items.get( _n));
 
-	    }catch( Exception e){
+	}catch( Exception e){
 
-		System.out.println( "failed to return item as an integer");
-		return -1;
-	    }		
-	}
+	    System.out.println( "failed to return item as an integer");
+	    return -1;
+	}		
+    }
 	    
-	//this function will return a boolean of the item at args  n as above
-	//it will only work on the condition the item is a 0 / 1, yes/no or
-	//true / false, it will return default false if this does not match
-	//but will also output an error to the console
-	boolean getItemBool( int _n){
+    //this function will return a boolean of the item at args  n as above
+    //it will only work on the condition the item is a 0 / 1, yes/no or
+    //true / false, it will return default false if this does not match
+    //but will also output an error to the console
+    boolean getItemBool( int _n){
 
-	    if( items.get( _n) == "1" || items.get( _n) == "yes" || items.get( _n) == "Yes"|| items.get( _n) == "true" || items.get( _n) == "True" || items.get( _n) == "TRUE"){
+	if( items.get( _n) == "1" || items.get( _n) == "yes" || items.get( _n) == "Yes"|| items.get( _n) == "true" || items.get( _n) == "True" || items.get( _n) == "TRUE"){
 
-		return true;
-	    }else if( items.get( _n) == "0" || items.get( _n) == "no" || items.get( _n) == "No" || items.get( _n) == "false" || items.get( _n) == "False" || items.get( _n) == "FALSE"){
+	    return true;
+	}else if( items.get( _n) == "0" || items.get( _n) == "no" || items.get( _n) == "No" || items.get( _n) == "false" || items.get( _n) == "False" || items.get( _n) == "FALSE"){
 
-		return false;
-	    }
-
-	    System.out.println( "Warning: item not successfully converted to bool from string");
 	    return false;
 	}
+
+	System.out.println( "Warning: item not successfully converted to bool from string");
+	return false;
     }
+}
 }
