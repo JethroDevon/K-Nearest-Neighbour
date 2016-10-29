@@ -1,10 +1,8 @@
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Scanner;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.lang.*;
+import java.util.*;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -23,6 +21,9 @@ public class Datasets{
     String nextLine[];
     CSVReader reader;
     Boolean isNumAndClass;
+
+    //stores weights for classifiers using key value pair method
+    ArrayList< Pair> weightlist = new ArrayList< Pair>();
 
     //contains a wrapped data structure whos elements have some
     //functionality to allow operations like compare z y lines
@@ -81,7 +82,7 @@ public class Datasets{
 
 	for( Data n: dataline){
 		
-	    System.out.print( n.showitems());
+	    System.out.println( n.showitems());
 	}
 	System.out.println("\n");
     }
@@ -114,7 +115,7 @@ public class Datasets{
 
 	    for(int d = 1; d < dataline.size()-1; d++){
 
-		System.out.println("     " +dataline.get(d).getItemString(0) + "   " + dataline.get(d).getItemString(t));
+		System.out.println("   " +dataline.get(d).getItemString(0) + "   " + dataline.get(d).getItemString(t));
 	    }
 	}else{
 
@@ -126,184 +127,289 @@ public class Datasets{
     //outputs to console K nearest with classifier type data and predicts the
     //output, also returns the predicted output as a string
     String classifiersKNearest( int _k, Data _d){
+<<<<<<< HEAD
+	
+	//loops for each agent 
+=======
 
 	//first outputs all present data
 	outputData();
 		
 	//loops for each agent initialising each data set with the distance
+>>>>>>> 8280ca2d4a102e4370c5ec57995dad8b754578c2
 	for( int row = 0; row < dataline.size(); row++){
-	    
-	    System.out.println( classifierCompareRowAndData( row, _d));
+	    	    
 	    dataline.get( row).relativepos = classifierCompareRowAndData( row, _d);
 	}
+	
+	return Weights( _k);
+    }
+
+    //takes the total weights of the k nearest classifiers
+    //and returns the closest - if they are equal it will return two
+    String Weights( int _k){
+
+	sortByNearest();
+
+	//outputs all data once it has sorted ir
+	System.out.println( " nearest data sets are as follows");
+	outputData();
+	System.out.print( " K nearest classifier is: ");
+
+	//this loop adds each value to weightlist in order to eventually add up all
+	//nieghbours with same classifiers
+	for( int q = 0; q < _k; q++){
+
+	    if(  dataline.get(q).classString == null){
+
+		_k++;
+	    }else{
+     		
+		//first argument in string is the classifier and the second is the computed weight ( 1/1 + distance)
+		weightlist.add( new Pair( dataline.get(q).classString, distFraction( dataline.get( q).relativepos)));
+	    }
+	}
+	//checks array for an exact fit - because if there is then there is no need to use a machine learning algorithm
+	for( Pair p: weightlist){
+	    if( p.d >= 1){
+
+		System.out.println( "match found");
+		return p.s;
+	    }
+	}
+       	    
+	for( int n = 0; n < _k -1; n++){
+	    for( int m = n; m < _k -1; m++){
 
 	//return KNearestClassifier();
 	
 	
-        return "mow";
-    }
-    
+<<<<<<< HEAD
+		if( weightlist.get(n).s.equals(weightlist.get(m).s)){
 
-//creates a data object and returns it afterwards
-Data userCreateDataObject(){
+		    weightlist.get(n).d += weightlist.get(m).d;
+		}
+	       
+	    }
+	}
 
-    Scanner in = new Scanner(System.in);
+	String temp = "";
+	double highest = 0;
+	for( Pair p : weightlist){
 
-    Data d = new Data();
+	    if( p.d > highest){
 
-    //adds the next patient number on the end
-    d.items.add( String.valueOf(dataline.size()-1));
-
-    System.out.println();
-    System.out.println("Input the new patient's 5 symptoms regarding");
-    System.out.println("Sore Throat, Fever, Swollen Glands, Congestion, Headache");
-    System.out.println("Input Yes or No, ONE PER LINE, CASE SENSITIVE!:");
-    System.out.println();
-	
-    for(int j=1;j<=5;j++)
-	d.items.add( in.nextLine());
+		temp = p.s;
+		highest = p.d;
+	    }
+	}
 	    
-    return d;
-}
+	return temp;
+=======
+        return "mow";
+>>>>>>> 8280ca2d4a102e4370c5ec57995dad8b754578c2
+    }
 
+    //sorts the arrayList dataline by the relativePos member value
+    //that belongs to the data values - using bubble sort
+    void sortByNearest(){
 
-//compares a row of data with an object of type data
-    int classifierCompareRowAndData(int row, Data data){
-	    	    
-    int temp = 0;
-    
+	boolean flag = true;
+	Data temp;
+	
+	while( flag){
 
-    //if both the first and last features of a set are not needed
-    if( isNumAndClass){
+	    flag = false;
+	    for( int j = 1; j < dataline.size()-1; j++){
 
+		if( dataline.get(j).relativepos > dataline.get( j+1).relativepos){
 		    
-	//loops for the number of features that are relevant
-	for( int i = 1; i < dataline.get(0).items.size()-1; i++){
-
-	    if( dataline.get( row).items.get(i).equals( data.items.get(i))){
-
-			    
-		temp++;
+		    temp = dataline.get( j);         
+		    dataline.set( j, dataline.get( j+1));
+		    dataline.set( j+1, temp);
+		    flag = true;
+		}
 	    }
 	}
     }
 
-    return temp;
-}
+    //creates a data object and returns it afterwards
+    Data userCreateDataObject(){
+
+	Scanner in = new Scanner(System.in);
+
+	Data d = new Data();
+
+	//adds the next patient number on the end
+	d.items.add( String.valueOf(dataline.size()-1));
+
+	System.out.println();
+	System.out.println("Input the new patient's data");
+	System.out.println(" CASE SENSITIVE!:");
+	System.out.println();
+	
+	for(int j=1;j<=5;j++)
+	    d.items.add( in.nextLine());
+	    
+	return d;
+    }
+
+
+    //compares a row of data with an object of type data
+    int classifierCompareRowAndData(int row, Data data){
+	    	    
+	int temp = 0;
+    
+
+	//if both the first and last features of a set are not needed
+	if( isNumAndClass){
+
+		    
+	    //loops for the number of features that are relevant
+	    for( int i = 1; i < dataline.get(0).items.size()-1; i++){
+
+		if( !dataline.get( row).items.get(i).equals( data.items.get(i))){
+			    
+		    temp++;
+		}
+	    }
+	}
+
+	return temp;
+    }
 	    
    
 
 
-//compares one existing agent row to another existing agent row for classifiers
-int classifierCompareToRows( int _r1, int _r2){
+    //compares one existing agent row to another existing agent row for classifiers
+    int classifierCompareToRows( int _r1, int _r2){
 
-    int temp = 0;
+	int temp = 0;
 
-    //if both the first and last features of a set are not needed
-    if( isNumAndClass){
+	//if both the first and last features of a set are not needed
+	if( isNumAndClass){
     
-	//loops for the number of features that are relevant
-	for( int i = 1; i < dataline.get(0).items.size()-1; i++){
+	    //loops for the number of features that are relevant
+	    for( int i = 1; i < dataline.get(0).items.size()-1; i++){
 
-	    if( dataline.get( _r1).items.get(i).equals(dataline.get( _r2).items.get(i))){
+		if( dataline.get( _r1).items.get(i).equals(dataline.get( _r2).items.get(i))){
 
 		
-		temp++;
+		    temp++;
+		}
 	    }
 	}
+	    
+	return temp;
     }
+
+    double distFraction( double _df){
+
+	double numerator = 1, denominator = 1;
+	return numerator / ( denominator + _df );
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // a class designed to manage multi dimensional array lists of any kind of data //
+    //////////////////////////////////////////////////////////////////////////////////
+    public class Data{
+
+	//stores each item of data
+	ArrayList<String> items;
+
+	//stores the first and last items of data if the first item is a number and the last a classifier output string
+	int itemNumber;
+	String classString;
+
+	//this is for storing this rows position relative to others
+	int relativepos;
 	    
-    return temp;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-// a class designed to manage multi dimensional array lists of any kind of data //
-//////////////////////////////////////////////////////////////////////////////////
-public class Data{
-
-    //stores each item of data
-    ArrayList<String> items;
-
-    //stores the first and last items of data if the first item is a number and the last a classifier output string
-    int itemNumber;
-    String classString;
-
-    //this is for storing this rows position relative to others
-    int relativepos;
-	    
-    Data(){
+	Data(){
 		
-	items = new ArrayList<String>();
-    }
+	    items = new ArrayList<String>();
+	}
 	   
 
-    //if the data input starts with a listing number
-    void setItemNum( int _num){
+	//if the data input starts with a listing number
+	void setItemNum( int _num){
 
-	itemNumber = _num;
-    }
+	    itemNumber = _num;
+	}
 	    
-    //if the data ends with a string classifier
-    void setClassString( String _string){
+	//if the data ends with a string classifier
+	void setClassString( String _string){
 
-	classString = _string;
-    }
+	    classString = _string;
+	}
 	    
-    void addString( String _S){
+	void addString( String _S){
 
-	items.add( _S); 
-    }
+	    items.add( _S); 
+	}
 			 
-    //simply returns the list of items delimited with "-" to show that they have been
-    //split into seperate variables
-    String showitems(){
+	//simply returns the list of items delimited with "-" to show that they have been
+	//split into seperate variables
+	String showitems(){
 
-	String i = "";
+	    String i = "";
 		      
-	for( String c : items)
-	    i += ( c + " ");
+	    for( String c : items)
+		i += ( c + " ");
 
-	return i;
-    }
-
-    //this function returns the string value of the item at position in args n
-    String getItemString( int _n){
-
-	return items.get( _n);
-    }
-
-    //this function is the same as above but if the function can be returned
-    //as a positive integer then it will be else it will return minus one
-    int getItemInt( int _n){
-
-	try{
-
-	    return Integer.parseInt( items.get( _n));
-
-	}catch( Exception e){
-
-	    System.out.println( "failed to return item as an integer");
-	    return -1;
-	}		
-    }
-	    
-    //this function will return a boolean of the item at args  n as above
-    //it will only work on the condition the item is a 0 / 1, yes/no or
-    //true / false, it will return default false if this does not match
-    //but will also output an error to the console
-    boolean getItemBool( int _n){
-
-	if( items.get( _n) == "1" || items.get( _n) == "yes" || items.get( _n) == "Yes"|| items.get( _n) == "true" || items.get( _n) == "True" || items.get( _n) == "TRUE"){
-
-	    return true;
-	}else if( items.get( _n) == "0" || items.get( _n) == "no" || items.get( _n) == "No" || items.get( _n) == "false" || items.get( _n) == "False" || items.get( _n) == "FALSE"){
-
-	    return false;
+	    return i;
 	}
 
-	System.out.println( "Warning: item not successfully converted to bool from string");
-	return false;
+	//this function returns the string value of the item at position in args n
+	String getItemString( int _n){
+
+	    return items.get( _n);
+	}
+
+	//this function is the same as above but if the function can be returned
+	//as a positive integer then it will be else it will return minus one
+	int getItemInt( int _n){
+
+	    try{
+
+		return Integer.parseInt( items.get( _n));
+
+	    }catch( Exception e){
+
+		System.out.println( "failed to return item as an integer");
+		return -1;
+	    }		
+	}
+	    
+	//this function will return a boolean of the item at args  n as above
+	//it will only work on the condition the item is a 0 / 1, yes/no or
+	//true / false, it will return default false if this does not match
+	//but will also output an error to the console
+	boolean getItemBool( int _n){
+
+	    if( items.get( _n) == "1" || items.get( _n) == "yes" || items.get( _n) == "Yes"|| items.get( _n) == "true" || items.get( _n) == "True" || items.get( _n) == "TRUE"){
+
+		return true;
+	    }else if( items.get( _n) == "0" || items.get( _n) == "no" || items.get( _n) == "No" || items.get( _n) == "false" || items.get( _n) == "False" || items.get( _n) == "FALSE"){
+
+		return false;
+	    }
+
+	    System.out.println( "Warning: item not successfully converted to bool from string");
+	    return false;
+	}
     }
-}
+
+    //simple helper class stores floats and strings as key value pairs
+    class Pair{
+
+	double d;
+	String s;
+
+	Pair( String _s, double _d){
+
+	    d = _d;
+	    s = _s;
+	}
+    }
 }

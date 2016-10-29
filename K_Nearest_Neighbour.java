@@ -9,7 +9,7 @@ public class K_Nearest_Neighbour{
 
        	d = new Datasets( "diagnoses.csv", true);
 	Datasets.Data data = d.userCreateDataObject();
-	System.out.println( d.classifiersKNearest( 1, data));
+	System.out.println( d.classifiersKNearest( 3, data));
     }
 
     public static void main(String[] args){
