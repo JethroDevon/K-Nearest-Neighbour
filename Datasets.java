@@ -15,7 +15,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 //data sets and simply concentrate on performing operations on them with few lines
 //of code in future
 public class Datasets{
-
+    
     //flag tells code wether or not it is dealing
     //with a list of classifiers or a list of integers
     boolean is_classifier;
@@ -33,7 +33,7 @@ public class Datasets{
     //is true if the data starts with a number and ends with a string classifier
     Datasets( String _CSVdatafile, Boolean _isNumAndClass){
 
-	//this flag determines wether or not the data starts with an agent number and ends with a string representing a class
+       	//this flag determines wether or not the data starts with an agent number and ends with a string representing a class
 	isNumAndClass = _isNumAndClass;
 	    
 	try{
@@ -123,26 +123,23 @@ public class Datasets{
 	    
     }
 
-    ///TO DO - FIX THIS!!!
     //outputs to console K nearest with classifier type data and predicts the
     //output, also returns the predicted output as a string
     String classifiersKNearest( int _k, Data _d){
 
 	//first outputs all present data
 	outputData();
-	
-	//create an array to store the positions of _k number of agents
-	int[] lowest = new int[_k];
 		
-	//loops for each agent 
+	//loops for each agent initialising each data set with the distance
 	for( int row = 0; row < dataline.size(); row++){
 	    
 	    System.out.println( classifierCompareRowAndData( row, _d));
 	    dataline.get( row).relativepos = classifierCompareRowAndData( row, _d);
 	}
 
+	//return KNearestClassifier();
 	
-
+	
         return "mow";
     }
     
