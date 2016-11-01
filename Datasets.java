@@ -25,8 +25,9 @@ public class Datasets{
     //stores weights for classifiers using key value pair method
     ArrayList< Pair> weightlist = new ArrayList< Pair>();
 
-    //contains a wrapped data structure whos elements have some
-    //functionality to allow operations like compare z y lines
+    //the object Data contains an array with data for each feature on it, it also contains methods
+    //that will perform some operations on that data, the result an object that contains each row of
+    //data and getters, setters and other operations to manipulate that data
     ArrayList<Data> dataline = new ArrayList<Data>();
 
     //dataset takes the path to a CSV based data set and initialises an array list
@@ -58,9 +59,9 @@ public class Datasets{
 		//so as to allow special functionality and aid with K nearest neighbour problems
 		if( _isNumAndClass && dataline.size() > 0){
 
-		    //ggets first element in list of data and add that to its
-		    //itemnumber for extra functionalities
-		    tmp.setItemNum( Integer.parseInt(tmp.items.get(0)));
+		    //gets first element in list of data and add that to its
+		    //item number for extra functionalities
+		    tmp.setItemNum( (int) Double.parseDouble(tmp.items.get(0)));
 
 		    //appends last item on the data list to string containing
 		    //class type for extra functionalities
@@ -124,19 +125,94 @@ public class Datasets{
 	    
     }
 
+    //this function will scale the data so as to have each feature not overpower the others
+    void scaleData(){
+	
+	//this stores the total number of features of the input data
+	int featurenum = dataline.get(0).items.size();
+
+	//work out the standard deviation and mean for each particular input feature
+	//the standard deviation is σ = sqrt( ⅟ₙ Σⁿᵢ₌₁ (xᵢ - ̂x)) and so theres a fair bit
+	//of processing to perform on the data 
+	double[] standard_deviation = new double[featurenum];
+	
+	//this value will store the mean value of the selected feature
+	double[] meanfeatures = new double[featurenum];
+	    
+	//loop for each feature barring the first feature and the last as that would be the classifier
+	//and the patient id number
+	for( int c = 1 ; c < featurenum -1; c++){
+
+	    double temp = 0;
+
+	    //loop for each row and calculate the mean of that one feature
+	    for( int r = 1; r < dataline.size(); r++){
+
+		temp += dataline.get(r).getItemDouble(c);
+	    }
+
+	    //store  the mean features variable and reset temp
+	    meanfeatures[c] = temp/dataline.size()-1;
+	    temp = 0;
+
+	    //this time round each member of feature data has its value subtracted by the mean
+	    //of those features and is squared
+	    for( int r = 1; r < dataline.size(); r++){
+
+		temp += Math.pow( dataline.get(r).getItemDouble(c) - meanfeatures[c], 2);
+	    }
+
+	    temp = temp/dataline.size()-1;
+	    standard_deviation[c] = Math.sqrt(temp);
+
+	    //now for each value the scaled data id put back onto the array lists
+	    //but first using the formula x' = xᵢ - ̂x/σ to each item
+	    for( int r = 1; r < dataline.size(); r++){
+
+		double temp2 = ( dataline.get(r).getItemDouble(c) - meanfeatures[c])/standard_deviation[c];
+		dataline.get(r).setItem( c, Double.toString(temp2));
+	    }
+	}
+    }
+
+    //this function takes two rows of data as args and returns the sum of difference² between each feature
+    double compareRows( Data A, Data B){
+
+	double total = 0;
+	int numfeatures = dataline.get(0).items.size();
+	
+	for( int f = 1; f < numfeatures -1; f++)
+	    total += Math.pow( A.getItemDouble(f), 2) + Math.pow( B.getItemDouble(f), 2);
+
+	return total;
+    }
+
+    //takes another array of scaled data as an argument and makes predictions
+    //for each row based on the data allready existing in this class, outputs a
+    //csv file called predictions.csv
+    //this function will also output statistical data such as a confusion matrix
+    //accuracy, sensitivity, precision and specifity with respect to the class
+    //malign
+    void makePredictions( ArrayList<Data> _predictions, int _k){
+
+	//compare each row to each other row arranging the array in order of best fit
+	//and adapt other classes to work from there, get the result and use that to
+	//create the predictions.csv
+
+	//compare predictions.csv to _predictions and initialise an array to
+	//output the confusion matrix
+
+	//output appropriate performance indicators with aquired data 
+    }
+    
+    
+
     //outputs to console K nearest with classifier type data and predicts the
     //output, also returns the predicted output as a string
     String classifiersKNearest( int _k, Data _d){
-<<<<<<< HEAD
-	
-	//loops for each agent 
-=======
 
-	//first outputs all present data
-	outputData();
-		
+     		
 	//loops for each agent initialising each data set with the distance
->>>>>>> 8280ca2d4a102e4370c5ec57995dad8b754578c2
 	for( int row = 0; row < dataline.size(); row++){
 	    	    
 	    dataline.get( row).relativepos = classifierCompareRowAndData( row, _d);
@@ -152,7 +228,7 @@ public class Datasets{
 	sortByNearest();
 
 	//outputs all data once it has sorted ir
-	System.out.println( " nearest data sets are as follows");
+	System.out.println( "Nearest data sets are as follows\n");
 	outputData();
 	System.out.print( " K nearest classifier is: ");
 
@@ -181,10 +257,6 @@ public class Datasets{
 	for( int n = 0; n < _k -1; n++){
 	    for( int m = n; m < _k -1; m++){
 
-	//return KNearestClassifier();
-	
-	
-<<<<<<< HEAD
 		if( weightlist.get(n).s.equals(weightlist.get(m).s)){
 
 		    weightlist.get(n).d += weightlist.get(m).d;
@@ -205,11 +277,10 @@ public class Datasets{
 	}
 	    
 	return temp;
-=======
-        return "mow";
->>>>>>> 8280ca2d4a102e4370c5ec57995dad8b754578c2
+
     }
 
+    //should be called sort by K nearest
     //sorts the arrayList dataline by the relativePos member value
     //that belongs to the data values - using bubble sort
     void sortByNearest(){
@@ -310,20 +381,24 @@ public class Datasets{
     }
 
 
-    //////////////////////////////////////////////////////////////////////////////////
-    // a class designed to manage multi dimensional array lists of any kind of data //
-    //////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ///a class designed to manage a row of data, to be used in an arraylist structure //
+    ////////////////////////////////////////////////////////////////////////////////////
     public class Data{
 
 	//stores each item of data
 	ArrayList<String> items;
 
-	//stores the first and last items of data if the first item is a number and the last a classifier output string
+	//contains the PID or first value as a number to identify the row, classString stores the
+	//final classifier at the end
 	int itemNumber;
 	String classString;
 
-	//this is for storing this rows position relative to others
+	//this is for storing this rows position relative to others in relation to the K nearest
 	int relativepos;
+
+	//might need a finer value to store the position
+	double doublerelativepos;
 	    
 	Data(){
 		
@@ -367,7 +442,7 @@ public class Datasets{
 	}
 
 	//this function is the same as above but if the function can be returned
-	//as a positive integer then it will be else it will return minus one
+	//as a positive integer else it will return minus one so as to detect an error
 	int getItemInt( int _n){
 
 	    try{
@@ -379,6 +454,28 @@ public class Datasets{
 		System.out.println( "failed to return item as an integer");
 		return -1;
 	    }		
+	}
+
+	//sets the item at index in args 1 to value in args 2
+	//kind of odd converting things to and from string but
+	//serves as a good default for oop 
+	void setItem( int _i, String _s){
+
+	    items.set( _i, _s);
+	}
+
+	//this function is the same as above but returns a double
+	Double getItemDouble( int _i){
+
+	    try{
+
+		return (double) Double.parseDouble( items.get( _i));
+
+	    }catch( Exception e){
+
+		System.out.println( e.toString());
+		return -0.1;
+	    }
 	}
 	    
 	//this function will return a boolean of the item at args  n as above
