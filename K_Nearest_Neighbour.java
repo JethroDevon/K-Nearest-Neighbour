@@ -5,7 +5,7 @@ import java.util.*;
 public class K_Nearest_Neighbour{
 
     Scanner in = new Scanner( System.in);
-    Datasets d;
+    Datasets d, train;
     
     K_Nearest_Neighbour(){
 
@@ -41,7 +41,12 @@ public class K_Nearest_Neighbour{
 	//normalisation as an option
 	}else if( c.equals("2")){
 
-	    d = new Datasets( "breast_cancer_train.csv",true);
+	    //creates the dataset to work with
+	    d = new Datasets( "breast_cancer_train.csv", true);
+
+	    //initialises a set of data so I can pass it to the dataset object d
+	    //for processing
+	    train = new Datasets( "breast_cancer_test.csv", true);
 
 	    int k = 0;
 	    //makes sure value that is input is not greater than the total
@@ -57,8 +62,12 @@ public class K_Nearest_Neighbour{
 		    flag = false;
 		}
 
-		d.scaleData();
-		//d.runTest( "breast_cancer_train.csv", k);
+		//zeros data and initializes test set
+		d.prepareData( train.dataline);
+
+		//uses test set to make predictions, will output a .cvs file based on the K value and display
+		//a confusion matrix along with the performance indicators
+		d.findKN( k);
 	    }
 	}
     }
