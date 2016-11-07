@@ -178,6 +178,7 @@ public class Datasets{
        
 	//this stores the total number of features of the input data
 	int featurenum = dataline.get(0).items.size();
+	System.out.println( "total features: "+featurenum);
 
 	//work out the standard deviation and mean for each particular input feature
 	//the standard deviation is σ = sqrt( ⅟ₙ Σⁿᵢ₌₁ (xᵢ - ̂x)) and so theres a fair bit
@@ -215,10 +216,10 @@ public class Datasets{
 
 	    //now for each value the scaled data id put back onto the array lists
 	    //but first using the formula x' = xᵢ - ̂x/σ to each item
-	    for( int r = 1; r < dataline.size(); r++){
+	    for( int r = 1; r < dataline.size()-1; r++){
 
-		double temp2 = ( dataline.get(r).getItemDouble(c) - meanfeatures[c])/standard_deviation[c];
-		dataline.get(r).setItem( r, Double.toString(temp2));
+		double temp2 = ( dataline.get(c).getItemDouble(r) - meanfeatures[c])/standard_deviation[c];
+		dataline.get(c).setItem( r, Double.toString(temp2));
 	    }
 	}
     }
@@ -241,8 +242,8 @@ public class Datasets{
 	//adds test data to training data and scales it
 	dataline.addAll( _testset);
 
-	rescaling();
-	//standardization();
+	//rescaling();
+	standardization();
 
 	
 	//seperates test and training set again, initialising the
@@ -608,8 +609,7 @@ public class Datasets{
 	}
 
 	//this function finds the weighted classifier based on the k nearest value
-	//im repeating myself a fair bit here but I may one day refactor all of this
-	//long after its been marked
+	//for now this function just returns the majority class
 	void Weights( int _K){
 
 	    //adds each classifier and position of k nearest to weights for
@@ -617,31 +617,31 @@ public class Datasets{
 	    for (int i = 0; i < _K; i++) {
 
 		//adds 1/1+d value to each classifier
-		weights.add( new Pair( knearest.get(i).classString, i));
+		weights.add( new Pair( knearest.get(i).classString, 0));
 	    }
 
-	    //sums up all classifier chances based on closeness
 	    for (int i = 0; i < weights.size(); i++) {
-		for (int n = 0; n < weights.size(); n++) {
+		for (int q = 0; q < weights.size(); q++) {
 
-		    //sums up the total weight of each classifier as it appears
-		    if( n != i && weights.get(i).s == weights.get(n).s){
+		    if( weights.get(i).s.equals(weights.get(q).s)){
 
-			weights.get(i).d += weights.get(n).d;
+			weights.get(i).d += 1;
 		    }
 		}
 	    }
 
-	    //finds the highest value classifier
+	    String temp = "";
 	    double highest = 0;
 	    for( Pair p : weights){
 
 		if( p.d > highest){
 
-		    prediction = p.s;
+		    temp = p.s;
 		    highest = p.d;
 		}
 	    }
+
+	    prediction = temp;
 	}
 
 	//removes item in K nearest with the same item number to clear out repeating rows
