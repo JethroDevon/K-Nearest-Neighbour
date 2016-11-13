@@ -1,8 +1,11 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.StringWriter;
 import java.lang.*;
 import java.util.*;
+import java.io.PrintWriter;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -173,12 +176,10 @@ public class Datasets{
     }
 
     //this function will scale the data so as to have each feature not overpower the others
-    ///CHANGE c TO F FOR FEATURE AND r TO I FOR INDEX
     void standardization(){
        
 	//this stores the total number of features of the input data
 	int featurenum = dataline.get(0).items.size();
-	System.out.println( "total features: "+featurenum);
 
 	//work out the standard deviation and mean for each particular input feature
 	//the standard deviation is σ = sqrt( ⅟ₙ Σⁿᵢ₌₁ (xᵢ - ̂x)) and so theres a fair bit
@@ -190,42 +191,42 @@ public class Datasets{
 
 	//loop for each feature barring the first feature and the last as that would be the classifier
 	//and the patient id number
-	for( int c = 1; c < featurenum -1; c++){
+	for( int f = 1; f < featurenum -1; f++){
 
 	    double temp = 0;
 
 	    //loop for each row and calculate the mean of that one feature
-	    for( int r = 1; r < dataline.size(); r++){
+	    for( int i = 1; i < dataline.size(); i++){
 
-		temp += dataline.get(r).getItemDouble(c);
+		temp += dataline.get(i).getItemDouble(f);
 	    }
 
 	    //store  the mean features variable and reset temp
-	    meanfeatures[c] = temp/dataline.size();
+	    meanfeatures[f] = temp/dataline.size();
 	    temp = 0;
 
 	    //this time round each member of feature data has its value subtracted by the mean
 	    //of those features and is squared
-	    for( int r = 1; r < dataline.size(); r++){
+	    for( int i = 1; i < dataline.size(); i++){
 
-		temp += Math.pow( dataline.get(r).getItemDouble(c) - meanfeatures[c], 2);
+		temp += Math.pow( dataline.get(i).getItemDouble(f) - meanfeatures[f], 2);
 	    }
 
 	    temp = temp/dataline.size();
-	    standard_deviation[c] = Math.sqrt(temp);
+	    standard_deviation[f] = Math.sqrt(temp);
 
 	    //now for each value the scaled data id put back onto the array lists
 	    //but first using the formula x' = xᵢ - ̂x/σ to each item
-	    for( int r = 1; r < dataline.size()-1; r++){
+	    for( int i = 1; i < dataline.size()-1; i++){
 
-		double temp2 = ( dataline.get(c).getItemDouble(r) - meanfeatures[c])/standard_deviation[c];
-		dataline.get(c).setItem( r, Double.toString(temp2));
+		double temp2 = ( dataline.get(i).getItemDouble(f) - meanfeatures[f])/standard_deviation[f];
+		dataline.get(i).setItem( f, Double.toString(temp2));
 	    }
 	}
     }
 
 
-
+    //////////////////////////////////////////////////////////////////////////////
     ///////////////////////////    prepare data     \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\////////////////\\\\\\\\\\\\\\\\
     //this function takes another array of data adds it to the present dataline\\\
@@ -233,81 +234,112 @@ public class Datasets{
     //and initialised the testset array list                                   ///
     //////////////////////////////////////////////////////////////////////////////
     void prepareData( ArrayList<Data> _testset){
-
+	
 	//remove the first line of the test set as it contains headings
 	_testset.remove(0);
+	dataline.remove(0);
 
 	int tsize = _testset.size();
+	int dsize = dataline.size();
 
 	//adds test data to training data and scales it
 	dataline.addAll( _testset);
 
 	//rescaling();
 	standardization();
-
 	
-	//seperates test and training set again, initialising the
-	//member object for containing the data set for this class
-	for ( int i = dataline.size()-1; i > tsize; i--) {
-
+	for ( int i = dsize; i < dsize + tsize; i++) {
+	    
 	    testset.add( dataline.get(i));
-	    dataline.remove(i);
 	}
+	
+	for (int i = dsize + tsize -1; i > dsize; i--) {
 
-	//loops for each item of testing data
-	for (int i = 0; i < testset.size(); i++) {
-
-	    //loops for each item of training data to each testing data to find the fit
-	    //of each one and storeit in each testing data
-	    for( int r = 1; r < dataline.size(); r++){
-
-		testset.get(i).findFit( dataline.get(r));
-	    }
+	    dataline.remove( i);
 	}
     }
 
-    //makes predictions for K nearest outputs a .cvs file and confusion matrix
-    //complete with performance indicators, this is the only class that is not
-    //in keeping with the object oriented paradigm I have managed to keep consistently
-    //the solution will to dynamically initialise an arraylist in the data class
-    //and use the prediction and classString to return data for processing
+    ////////////////////////////////////////////////////////////////////////////////////
+    //              finds K nearest after initialising each test set item           ////
+    ////////////////////////////////////////////////////////////////////////////////////
+    //makes predictions for K nearest outputs a .cvs file and confusion matrix        //
+    //complete with performance indicators, this is the only class that is not       ///
+    //in keeping with the object oriented paradigm I have managed to keep consistently//
+    //the solution will to dynamically initialise an arraylist in the data class////////
+    //and use the prediction and classString to return data for processing//////////////
+    ////////////////////////////////////////////////////////////////////////////////////
     void findKN( int _K){
 
+	System.out.println("size of test set is: " + testset.size() + " and training set: " + dataline.size());
 
-	for (int i = 0; i < testset.size(); i++) {
+	//the following block will initialise each object training data with the K lowest
+	//in the arraylist 'dataset'
+	//loops k amount of times
+	for (int J = 0; J < _K; J++) {
+	    
+	    //initialise each test set with k amount of nearest neighbours - the following is
+	    //a find lowest algorithm
+	    for (int i = 0; i < testset.size() ; i++) {
 
-	    testset.get(i).getLowest( _K);
+		double temp = 99999;
+		Data emptydata = new Data();
+		
+		for (int d = 0; d < dataline.size(); d++) {
+
+		    double totalFitness = 0;
+
+		    //this loops for each feature in the dataset, f stands for feature
+		    for (int f = 1; f < dataline.get(d).items.size()-1; f++) {
+
+			//adds up the distance between each feature
+			double score = dataline.get(d).getItemDouble(f) + testset.get(i).getItemDouble(f);
+			totalFitness += Math.pow( score, 2);
+		    }
+
+		    //if total fitness is less that the data previously tested and not allready present in the testset then
+		    //initialise emptydata with the lowest, and set temp to hold lowest
+		    if( temp > totalFitness && !testset.get(i).isPresentInKnearest( dataline.get(d).itemNumber)){
+
+			temp = totalFitness;
+			emptydata = dataline.get(d);
+		    }
+		}
+
+		testset.get(i).knearest.add( emptydata);
+	    }
 	}
 
+
+
+	//initialise weights and make predictions
+	//create text file for output data also
 	for (int i = 0; i < testset.size(); i++) {
 
-	    testset.get(i).Weights( _K);
-	    //System.out.println(testset.get(i).prediction + " " + testset.get(i).classString);
-	    // testset.get(i).bestfits(_K);
-	    //System.out.println("\n\n");
+	    testset.get(i).Weights( _K);	 
 	}
 
-	int tMalign = 0, fMalign = 0, fBenign = 0, tBenign = 0;
+
+	double tMalign = 0, fMalign = 0, fBenign = 0, tBenign = 0;
 	double Acc = 0, Spec = 0, Prec = 0, Sen = 0;
 
 	for ( int i = 0; i < testset.size(); i++)
 	    if( testset.get(i).classString.equals( "malign") && testset.get(i).prediction.equals( "malign"))
-		tMalign++;
-
-
-	for ( int i = 0; i < testset.size(); i++)
-	    if( testset.get(i).classString.equals( "malign") && testset.get(i).prediction.equals( "benign"))
 		fMalign++;
 
 
 	for ( int i = 0; i < testset.size(); i++)
+	    if( testset.get(i).classString.equals( "malign") && testset.get(i).prediction.equals( "benign"))
+		tMalign++;
+
+
+	for ( int i = 0; i < testset.size(); i++)
 	    if( testset.get(i).classString.equals( "benign") && testset.get(i).prediction.equals( "benign"))
-		tBenign++;
+		fBenign++;
 
 
 	for ( int i = 0; i < testset.size(); i++)
 	    if( testset.get(i).classString.equals( "benign") && testset.get(i).prediction.equals( "malign"))
-		fBenign++;
+		tBenign++;
 
 
 	//outputs basic comfusion matrix
@@ -316,9 +348,9 @@ public class Datasets{
 	System.out.println( "Actual Benign|        " + fMalign + "            " + tBenign);
 
 	try{
-	    
+		    
 	    //work out the level of accuracy (TP + TN)/Total
-	    Acc = ( tMalign + tBenign)/( testset.size());
+	    Acc = ( tMalign + tBenign)/testset.size();
 
 	    //precision with respect to 'malign'
 	    Prec = tMalign/( tMalign + fMalign);
@@ -330,11 +362,59 @@ public class Datasets{
 	    Sen = tMalign/( tMalign + tBenign);
 	}catch(Exception e){
 
-	    System.out.println("Arithmetic exception: values to compute performance identifiers contain zero values ");
+	    System.out.println("\nArithmetic exception: values to compute performance identifiers contain zero values!! ");
 	}
 	
 	System.out.println( "\n\nAccuracy of confusion matrix is: " + Acc + ". Precision with respect to 'malign: " + Prec + ".");
 	System.out.println( "Specifity with respect to 'malign: " + Spec + ". Sensitivity with respect to 'malign': " + Sen + ".");
+
+        String matrix = "        _____|Predicted Malign |  Predicted Benign\nActual Malign|        " + tMalign + "               " + fBenign + "\r\nActual Benign|        " + fMalign + "            " + tBenign;
+
+	try{
+
+	    
+	    String title = "predictions" + String.valueOf( _K) + ".csv";
+	    CSVWriter writer = new CSVWriter(new FileWriter( title), ',');
+	    
+	    // String writedata = "";
+	    // String ACNPREC =  "\n\nAccuracy of confusion matrix is: " + Acc + ". Precision with respect to 'malign: " + Prec + ".";
+	    // String SPENSEN = "Specifity with respect to 'malign: " + Spec + ". Sensitivity with respect to 'malign': " + Sen + ".";
+	    // String title = String.valueOf(_K) + "_NEAREST NEIGHBOURS";
+	    // PrintWriter writer = new PrintWriter( title, "UTF-8");
+	
+	    //this block writes everything out
+	    for (int i = 0; i < testset.size(); i++) {
+	      		
+		for( int m = 0; m < _K; m++){
+
+		    String[] line = new String[ testset.get(i).knearest.get(m).items.size()];
+		    for (int q = 0; q < line.length; q++) {
+
+		         line[q] = testset.get(i).knearest.get(m).getItemString(q);	      
+		    }
+		    writer.writeNext(line);
+        
+		}
+		
+		// for (int w = 0; w < testset.size(); w++) {
+
+		//     writedata += testset.get(w).writeFits();
+		// }
+
+		// writer.println(writedata);
+		// writer.println("\n"+matrix);
+		// writer.println("\n"+ACNPREC);
+		// writer.println("\n"+SPENSEN);
+	     		
+	
+	    }
+
+	    writer.close();
+
+	}catch(Exception e){
+		
+	    System.out.println( "error printing document");
+	}
     }
 
 
@@ -522,7 +602,7 @@ public class Datasets{
 	ArrayList<String> items;
 
 	//stores an array list of K nearest number based training data
-	ArrayList<Data> knearest = new ArrayList<Data>();
+	public ArrayList<Data> knearest = new ArrayList<Data>();
 
 	ArrayList< Pair> weights = new ArrayList< Pair>();
 
@@ -547,19 +627,23 @@ public class Datasets{
 
 	//outputs n amount of nearest fits - once the fitness have been found that is
 	//this is for debugging
-	void bestfits( int _n){
+	String writeFits(){
 
-	    for (int n = 0; n < _n; n++) {
+	    String ret = "";
 
-		int totalfit = 0;
+	    for (int n = 0; n < knearest.size(); n++) {
+
+		double totalfit = 0;
 
 		for (int i = 1; i < items.size()-1; i++) {
 
 		    totalfit += Math.pow( getItemDouble(i) + knearest.get(n).getItemDouble(i), 2);
 		}
 
-		System.out.println( "best n fits for are: " + n + " is " + totalfit + " - " + knearest.get(n).classString);
+	        ret += " The " + n + " closest fit to " + itemNumber + " is: " + knearest.get(n).itemNumber + " and has a fit of: " +  totalfit + ". \r\n";
 	    }
+
+	    return ret;
 	}
 
 	//this function takes a Data object and checks its fit against this objects features
@@ -574,39 +658,7 @@ public class Datasets{
 
 	    _data.fitness = totalfit;
 	    knearest.add( _data);
-	}
-
-	//simpler than a sort algorithm, its a find lowest algorithm just with type Data
-	//this just reinitialises knearest with the best fitting values starting with the lowest
-	void getLowest( int _K){
-
-	    ArrayList<Data>newKnearest = new ArrayList<Data>();
-
-	    //this loops _K times
-	    for (int o = 0; o < _K; o++) {
-
-		Data temp = new Data();
-		temp.fitness = 1000;
-
-		for (int i = 0; i < knearest.size()-1; i++) {
-
-		    if( knearest.get(i).fitness < temp.fitness){
-
-			temp = knearest.get(i);
-		    }
-		}
-
-		//remove that lowest value from the list
-		removeKnearestByPid( temp.itemNumber);
-		newKnearest.add( temp);
-	    }
-
-	    //clear knearest array
-	    knearest.clear();
-
-	    //update knearest with k sorted values
-	    knearest.addAll( newKnearest);
-	}
+	}        
 
 	//this function finds the weighted classifier based on the k nearest value
 	//for now this function just returns the majority class
@@ -654,6 +706,21 @@ public class Datasets{
 		    knearest.remove(i);
 		}
 	    }
+	}
+
+	boolean isPresentInKnearest( int _pid){
+
+	    boolean flag = false;
+	    
+	    for (int i = 0; i < knearest.size(); i++) {
+
+		if( knearest.get(i).itemNumber == _pid){
+
+		    flag = true;
+		}
+	    }
+
+	    return flag;
 	}
 
 	//if the data input starts with a listing number

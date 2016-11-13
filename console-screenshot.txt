@@ -1,0 +1,68 @@
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+2
+Please input value K:
+3
+size of test set is: 210 and training set: 480
+        _____|Predicted Malign |  Predicted Benign
+Actual Malign|        70.0               14.0
+Actual Benign|        1.0            125.0
+
+
+Accuracy of confusion matrix is: 0.9285714285714286. Precision with respect to 'malign: 0.9859154929577465.
+Specifity with respect to 'malign: 0.8333333333333334. Sensitivity with respect to 'malign': 0.358974358974359.
+[devonrevenge@FUP K-Nearest-Neighbour]$ java K_Nearest_Neighbour
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+3
+[devonrevenge@FUP K-Nearest-Neighbour]$ java K_Nearest_Neighbour
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+2
+Please input value K:
+3
+size of test set is: 210 and training set: 480
+        _____|Predicted Malign |  Predicted Benign
+Actual Malign|        70.0               14.0
+Actual Benign|        1.0            125.0
+
+
+Accuracy of confusion matrix is: 0.9285714285714286. Precision with respect to 'malign: 0.9859154929577465.
+Specifity with respect to 'malign: 0.8333333333333334. Sensitivity with respect to 'malign': 0.358974358974359.
+[devonrevenge@FUP K-Nearest-Neighbour]$ java K_Nearest_Neighbour
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+2
+Please input value K:
+5
+size of test set is: 210 and training set: 480
+        _____|Predicted Malign |  Predicted Benign
+Actual Malign|        71.0               14.0
+Actual Benign|        0.0            125.0
+
+
+Accuracy of confusion matrix is: 0.9333333333333333. Precision with respect to 'malign: 1.0.
+Specifity with respect to 'malign: 0.8352941176470589. Sensitivity with respect to 'malign': 0.3622448979591837.
+[devonrevenge@FUP K-Nearest-Neighbour]$ java K_Nearest_Neighbour
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+2
+Please input value K:
+7
+size of test set is: 210 and training set: 480
+        _____|Predicted Malign |  Predicted Benign
+Actual Malign|        71.0               4.0
+Actual Benign|        0.0            135.0
+
+
+Accuracy of confusion matrix is: 0.9809523809523809. Precision with respect to 'malign: 1.0.
+Specifity with respect to 'malign: 0.9466666666666667. Sensitivity with respect to 'malign': 0.3446601941747573.
+[devonrevenge@FUP K-Nearest-Neighbour]$ java K_Nearest_Neighbour
+please press 1 for task 1 and 2 for task 2, anything else to quit:
+2
+Please input value K:
+9
+size of test set is: 210 and training set: 480
+        _____|Predicted Malign |  Predicted Benign
+Actual Malign|        71.0               2.0
+Actual Benign|        0.0            137.0
+
+
+Accuracy of confusion matrix is: 0.9904761904761905. Precision with respect to 'malign: 1.0.
+Specifity with respect to 'malign: 0.9726027397260274. Sensitivity with respect to 'malign': 0.34134615384615385.
+[devonrevenge@FUP K-Nearest-Neighbour]$ 
